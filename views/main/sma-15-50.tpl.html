@@ -1,0 +1,139 @@
+<script src="/amcharts/amcharts.js" type="text/javascript"></script>
+<script src="/amcharts/serial.js" type="text/javascript"></script>
+<script src="/amcharts/lang/ru.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+    var chartData = {{{graphics.data}}};
+    function loadChart(chartData) {
+      var chart = AmCharts.makeChart("chartdiv", {
+        "type": "serial",
+        "theme": "light",
+        "decimalSeparator": ",",
+        "thousandsSeparator": " ",
+        "language": "ru",
+        "pathToImages": "http://www.amcharts.com/lib/3/images/",
+        "dataProvider": chartData,
+        "valueAxes": [{
+          "id": "v1",
+          "axisColor": "#ff0000",
+          "axisThickness": 2,
+          "gridAlpha": 0,
+          "axisAlpha": 1,
+          "position": "left"
+        }/*, {
+          "id": "v2",
+          "axisColor": "#00aaaa",
+          "axisThickness": 2,
+          "gridAlpha": 0,
+          "axisAlpha": 1,
+          "position": "right"
+        }, {
+          "id": "v3",
+          "axisColor": "#005555",
+          "axisThickness": 2,
+          "gridAlpha": 0,
+          "axisAlpha": 1,
+          "position": "right"
+        }*/],
+        "graphs": [{
+          "valueAxis": "v1",
+          "lineColor": "#ff0000",
+          "bullet": "round",
+          "balloonText": "[[category]]<br /><b><span style='font-size:12px;'>Цена: [[value]]</span></b>",
+          "bulletBorderThickness": 1,
+          "hideBulletsCount": 30,
+          "title": "red line",
+          "valueField": "price",
+          "fillAlphas": 0
+        }, {
+          "valueAxis": "v2",
+          "lineColor": "#00aaaa",
+          "balloonText": "[[category]]<br /><b><span style='font-size:12px;'>SMA-15: [[value]]</span></b>",
+          "bullet": "square",
+          "bulletBorderThickness": 1,
+          "hideBulletsCount": 30,
+          "title": "yellow line",
+          "valueField": "sma15",
+          "fillAlphas": 0
+        }, {
+          "valueAxis": "v3",
+          "lineColor": "#005555",
+          "balloonText": "[[category]]<br /><b><span style='font-size:12px;'>SMA-50: [[value]]</span></b>",
+          "bullet": "square",
+          "bulletBorderThickness": 1,
+          "hideBulletsCount": 30,
+          "title": "blue line",
+          "valueField": "sma50",
+          "fillAlphas": 0
+        }, {
+          "valueAxis": "v4",
+          "lineColor": "#99ffff",
+          "balloonText": "[[category]]<br /><b><span style='font-size:12px;'>EMA-100: [[value]]</span></b>",
+          "bullet": "square",
+          "bulletBorderThickness": 1,
+          "hideBulletsCount": 30,
+          "title": "blue line",
+          "valueField": "ema100",
+          "fillAlphas": 0
+        }],
+        "dataDateFormat": "DD.MM.YYYY",
+        "mouseWheelZoomEnabled": true,
+        "chartScrollbar": {
+          "autoGridCount": true,
+          "graph": "g1",
+          "scrollbarHeight": 40
+        },
+        "chartCursor": {
+          "cursorPosition": "mouse",
+          "cursorColor": "#BD562D",
+          "categoryBalloonDateFormat": "DD.MM.YYYY"
+        },
+        "categoryField": "date",
+        "categoryAxis": {
+          "parseDates": true,
+          "axisColor": "#DADADA",
+          "dashLength": 1,
+          "minorGridEnabled": true
+        },
+        "exportConfig": {
+          menuRight: '20px',
+          menuBottom: '30px',
+          menuItems: [{
+            icon: 'http://www.amcharts.com/lib/3/images/export.png',
+            format: 'png'
+          }]
+        }
+      });
+
+      // this method is called when chart is first inited as we listen for "dataUpdated" event
+      function zoomChart() {
+          console.log('zoom');
+        // different zoom methods can be used - zoomToIndexes, zoomToDates, zoomToCategoryValues
+        this.zoomToIndexes(chartData.length - 30, chartData.length - 1);
+        console.log(chartData.length);
+      }
+      console.log(chart);
+
+      chart.addListener("rendered", zoomChart.bind(chart));
+      zoomChart.call(chart);
+    }
+
+    function reloadChart(sel) {
+        let id = $(sel).val();
+        if (id && chartData[id]) {
+            loadChart(chartData[id]);
+        } else {
+            $('#chartdiv').html('');
+        }
+    }
+
+    $(document).ready(function () {
+        reloadChart($('#sel_isin'));
+    });
+</script>
+<select id="sel_isin" onchange="reloadChart(this);">
+    {{#graphics.isins}}
+    <option value="{{.}}">{{.}}</option>
+    {{/graphics.isins}}
+</select>
+<div class="graphic" id="chartdiv" style="height:600px;width:100%"></div>
