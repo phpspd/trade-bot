@@ -8,14 +8,17 @@ const MS_IN_DAY = 24 * 60 * 60 * 1000
 
 let ISINs = [
     //'AFKS',
-    //'AFLT',
+    'AFLT',
     'CHMF',
     //'HIMCP',
     //'HYDR',
-    //'MFON',
-    //'MOEX',
+    'MFON',
+    'MOEX',
     //'UPRO',
-    //'SBER'
+    'SBER',
+    'GAZP',
+    'TATN',
+    'GMKN'
 ];
 
 async function init() {
@@ -43,6 +46,9 @@ async function tick (finishCb) {
             ;
 
         for (let i = 366; i > 0; --i) {
+            if (!security.getPrice(i)) {
+                continue;
+            }
             result[ISIN].graphic.push({
                 date: security.getDate(i),
                 price: security.getPrice(i),
@@ -50,58 +56,57 @@ async function tick (finishCb) {
                 sma50: Math.round(sma50.getValue(i) * 100) / 100,
                 ema20: Math.round(ema20.getValue(i) * 100) / 100,
                 ema30: Math.round(ema30.getValue(i) * 100) / 100,
-                ema100: Math.round(ema100.getValue(i) * 100) / 100
+                ema100: Math.round(ema100.getValue(i) * 100) / 100,
+                volume: security.getVolume(i)
             });
 
-            if (result[ISIN].graphic.length > 1) {
-                let currentData = result[ISIN].graphic[result[ISIN].graphic.length - 1];
-                let prevData = result[ISIN].graphic[result[ISIN].graphic.length - 2];
+            if (result[ISIN].graphic.length > 2) {
+                let T0Data = result[ISIN].graphic[result[ISIN].graphic.length - 1];
+                let T1Data = result[ISIN].graphic[result[ISIN].graphic.length - 2];
+                let T2Data = result[ISIN].graphic[result[ISIN].graphic.length - 3];
 
-                if (
-                    /*prevData.sma15 <= prevData.sma50 && */currentData.sma15 > currentData.sma50
-                    && prevData.sma15 < currentData.sma15 //&& currentData.sma15 < currentData.price
-                    && prevData.ema30 < currentData.ema30/* && prevData.price < currentData.price*/
-                ) {
-                    canBeBoughtIfPriceNearEMA30 = true;
-                } else {
-                    canBeBoughtIfPriceNearEMA30 = false;
+                if (+datesHelper.parseDateSmart(T0Data.date) < +datesHelper.parseDateSmart('2018-01-01')) {
+                    continue;
                 }
 
-                if (
-                    canBeBoughtIfPriceNearEMA30 && currentData.price > prevData.price
-                    && (currentData.price * 1 <= currentData.ema30 || currentData.price * 1 <= currentData.ema100)
-                ) {
+                if ((T1Data.sma15 - T1Data.price) / T1Data.price > /*0.03*/ 0.015 && (T1Data.ema100 - T1Data.price) / T1Data.ema100 > /*0.065*/ 0.03) {
                     buy.push({
-                        date: currentData.date,
-                        price: currentData.price,
-                        sma15: currentData.sma15,
-                        sma50: currentData.sma50,
-                        ema20: currentData.ema20,
-                        ema30: currentData.ema30,
-                        ema100: currentData.ema100
+                        date: T0Data.date,
+                        price: T0Data.price,
+                        sma15: T0Data.sma15,
+                        sma50: T0Data.sma50,
+                        ema20: T0Data.ema20,
+                        ema30: T0Data.ema30,
+                        ema100: T0Data.ema100,
+                        reason: 1
                     });
-                    canBeBoughtIfPriceNearEMA30 = false;
+                } else if (T1Data.price / T1Data.ema100 < 0.96) {
+                    buy.push({
+                        date: T0Data.date,
+                        price: T0Data.price,
+                        sma15: T0Data.sma15,
+                        sma50: T0Data.sma50,
+                        ema20: T0Data.ema20,
+                        ema30: T0Data.ema30,
+                        ema100: T0Data.ema100,
+                        reason: 2
+                    });
                 }
 
                 for (let buyItem of buy) {
-                    if (buyItem.sold) {
+                    if (buyItem.sold || +datesHelper.parseDateSmart(buyItem.date) == +datesHelper.parseDateSmart(T0Data.date)) {
                         continue;
                     }
 
                     if (
-                        (
-                            (buyItem.price * 0.98 <= buyItem.ema100 && currentData.price * 0.98 > currentData.ema100)
-                            || (buyItem.price * 0.98 <= buyItem.ema30 && currentData.price * 0.98 > currentData.ema30)
-                        )
-                        && currentData.price <= prevData.price
-                        && (
-                            buyItem.price * 1.02 <= currentData.price || buyItem.price * 0.9 >= currentData.price
-                            || prevData.ema30 > currentData.ema30 //|| currentData.sma15 < currentData.sma50
-                            //|| currentData.sma15 < prevData.sma15
-                        )
+                        buyItem.reason == 1 && T1Data.sma50 / T1Data.ema100 >= /*1.015*/ 1.015 || (T1Data.ema20 - T1Data.ema100) / T1Data.ema100 > 0.05/*0.05*/
                     ) {
-                        buyItem.soldPrice = currentData.price;
-                        buyItem.soldDate = currentData.date;
+                        buyItem.soldPrice = T0Data.price;
+                        buyItem.soldDate = T0Data.date;
+                        buyItem.sold = true;
+                    } else if (buyItem.reason == 2 && T1Data.ema100 / T1Data.price < 0.95) {
+                        buyItem.soldPrice = T0Data.price;
+                        buyItem.soldDate = T0Data.date;
                         buyItem.sold = true;
                     }
                 }

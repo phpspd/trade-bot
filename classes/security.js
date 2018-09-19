@@ -24,6 +24,7 @@ Security.prototype.init = async function() {
     await this._fillHistory();
     let securityData = await this._getCurrentPrice();
     this.price = securityData.LAST;
+    this.volume = securityData.VOLTODAY;
     if (this.price) {
         let item = {
             CLOSE: this.price,
@@ -98,6 +99,14 @@ Security.prototype.getPrice = function(daysBefore) {
 
 Security.prototype.getHistory = function() {
     return this.history;
+}
+
+Security.prototype.getVolume = function(daysBefore) {
+    if (daysBefore <= 0) {
+        return this.volume;
+    }
+
+    return this.history[this.history.length - daysBefore].VOLUME;
 }
 
 Security.prototype.getHistoryByDate = function (date) {

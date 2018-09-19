@@ -20,21 +20,14 @@
           "gridAlpha": 0,
           "axisAlpha": 1,
           "position": "left"
-        }/*, {
-          "id": "v2",
-          "axisColor": "#00aaaa",
-          "axisThickness": 2,
-          "gridAlpha": 0,
-          "axisAlpha": 1,
-          "position": "right"
         }, {
-          "id": "v3",
-          "axisColor": "#005555",
+          "id": "volume",
+          "axisColor": "#000000",
           "axisThickness": 2,
           "gridAlpha": 0,
           "axisAlpha": 1,
           "position": "right"
-        }*/],
+        }],
         "graphs": [{
           "valueAxis": "v1",
           "lineColor": "#ff0000",
@@ -94,6 +87,16 @@
           "hideBulletsCount": 30,
           "title": "blue line",
           "valueField": "ema100",
+          "fillAlphas": 0
+        }, {
+          "valueAxis": "volume",
+          "lineColor": "#000000",
+          "balloonText": "[[category]]<br /><b><span style='font-size:12px;'>Volume: [[value]]</span></b>",
+          "bullet": "square",
+          "bulletBorderThickness": 1,
+          "hideBulletsCount": 30,
+          "title": "black line",
+          "valueField": "volume",
           "fillAlphas": 0
         }],
         "dataDateFormat": "DD.MM.YYYY",
