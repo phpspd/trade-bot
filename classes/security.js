@@ -22,11 +22,15 @@ function Security (ISIN, engine, market, board) {
 
 Security.prototype.init = async function() {
     await this._fillHistory();
-    this.price = await this._getCurrentPrice();
-    /*this.history.push({
-        CLOSE: this.price,
-        TRADEDATE: datesHelper.getCurrentDate('iso')
-    });*/
+    let securityData = await this._getCurrentPrice();
+    this.price = securityData.LAST;
+    if (this.price) {
+        let item = {
+            CLOSE: this.price,
+            TRADEDATE: datesHelper.getDate(datesHelper.parseDateSmart(securityData.SYSTIME), 'iso')
+        };
+        this.history.push(item);
+    }
 }
 
 Security.prototype.getISIN = function() {
@@ -56,7 +60,7 @@ Security.prototype._fillHistory = async function (fromDate) {
         }
         let lastHistoryItem = this.history[this.history.length - 1];
         if (+datesHelper.parseDateSmart(lastHistoryItem.TRADEDATE) != +datesHelper.getStartTodayDate()) {
-            fromDate = datesHelper.parseDateSmart(lastHistoryItem.TRADEDATE);
+            fromDate = new Date(+datesHelper.parseDateSmart(lastHistoryItem.TRADEDATE) + MS_IN_DAY);
         }
     } while (+fromDate < datesHelper.getStartTodayDate() && data.length);
 }
@@ -80,8 +84,8 @@ Security.prototype._getHistory = async function (fromDate, tillDate) {
 }*/
 
 Security.prototype._getCurrentPrice = async function () {
-    let price = await proxy.getPrice(this.ISIN);
-    return price;
+    let securityData = await proxy.getPrice(this.ISIN);
+    return securityData;
 }
 
 Security.prototype.getPrice = function(daysBefore) {

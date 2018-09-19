@@ -67,6 +67,26 @@
           "fillAlphas": 0
         }, {
           "valueAxis": "v4",
+          "lineColor": "#55bbbb",
+          "balloonText": "[[category]]<br /><b><span style='font-size:12px;'>EMA-20: [[value]]</span></b>",
+          "bullet": "square",
+          "bulletBorderThickness": 1,
+          "hideBulletsCount": 30,
+          "title": "blue line",
+          "valueField": "ema20",
+          "fillAlphas": 0
+        }, {
+          "valueAxis": "v5",
+          "lineColor": "#77dddd",
+          "balloonText": "[[category]]<br /><b><span style='font-size:12px;'>EMA-30: [[value]]</span></b>",
+          "bullet": "square",
+          "bulletBorderThickness": 1,
+          "hideBulletsCount": 30,
+          "title": "blue line",
+          "valueField": "ema30",
+          "fillAlphas": 0
+        }, {
+          "valueAxis": "v6",
           "lineColor": "#99ffff",
           "balloonText": "[[category]]<br /><b><span style='font-size:12px;'>EMA-100: [[value]]</span></b>",
           "bullet": "square",
@@ -120,11 +140,19 @@
 
     function reloadChart(sel) {
         let id = $(sel).val();
-        if (id && chartData[id]) {
-            loadChart(chartData[id]);
+        if (id && chartData[id] && chartData[id].graphic) {
+            loadChart(chartData[id].graphic);
         } else {
             $('#chartdiv').html('');
         }
+        let trades = chartData[id].trades;
+        let str = '';
+        for (let trade of trades) {
+            str += '<p>Дата покупки ' + trade.date + '; Цена ' + trade.price + '; Дата продажи ' + trade.soldDate
+                + '; Цена ' + trade.soldPrice + '; Разница ' + (trade.soldPrice - trade.price) + '</p>';
+        }
+        str += '<p>Прибыль ' + chartData[id].profit + '; % ' + chartData[id].profitRel + '</p>';
+        $('#data').html(str); 
     }
 
     $(document).ready(function () {
@@ -137,3 +165,6 @@
     {{/graphics.isins}}
 </select>
 <div class="graphic" id="chartdiv" style="height:600px;width:100%"></div>
+<div id="data" style="height:600px;width:100%">
+    
+</div>

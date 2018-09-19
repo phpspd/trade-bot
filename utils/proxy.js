@@ -74,5 +74,5 @@ module.exports.getHistory = async function(engine, market, board, ISIN, format, 
 
 module.exports.getPrice = async function(ISIN) {
     let response = await Micex.securityMarketdata(ISIN);
-    return response.LAST;
+    return response;
 }
