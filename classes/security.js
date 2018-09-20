@@ -32,6 +32,7 @@ Security.prototype.init = async function() {
         };
         this.history.push(item);
     }
+    this.lotSize = securityData.securityInfo.LOTSIZE;
 }
 
 Security.prototype.getISIN = function() {
@@ -107,6 +108,17 @@ Security.prototype.getVolume = function(daysBefore) {
     }
 
     return this.history[this.history.length - daysBefore].VOLUME;
+}
+
+Security.prototype.getLotSize = function() {
+    return this.lotSize || 0;
+}
+
+Security.prototype.getAvgPrice = function(daysBefore, forDays) {
+    let sliceHistory = this.history.slice(this.history.length - daysBefore - forDays, this.history.length - daysBefore);
+    return sliceHistory.reduce((sum, item) => {
+        return sum + (item.CLOSE || item.LAST)
+    }, 0) / sliceHistory.length;
 }
 
 Security.prototype.getHistoryByDate = function (date) {

@@ -143,18 +143,26 @@
 
     function reloadChart(sel) {
         let id = $(sel).val();
-        if (id && chartData[id] && chartData[id].graphic) {
-            loadChart(chartData[id].graphic);
+        if (id && chartData.items[id] && chartData.items[id].graphic) {
+            loadChart(chartData.items[id].graphic);
         } else {
             $('#chartdiv').html('');
         }
-        let trades = chartData[id].trades;
+        let trades = chartData.items[id].trades;
         let str = '';
         for (let trade of trades) {
             str += '<p>Дата покупки ' + trade.date + '; Цена ' + trade.price + '; Дата продажи ' + trade.soldDate
                 + '; Цена ' + trade.soldPrice + '; Разница ' + (trade.soldPrice - trade.price) + '</p>';
         }
-        str += '<p>Прибыль ' + chartData[id].profit + '; % ' + chartData[id].profitRel + '</p>';
+        str += '<p>Затраты: ' + chartData.items[id].buySum + '; Прибыль ' + chartData.items[id].profit + '; % ' + chartData.items[id].profitRel + '</p>';
+        if (chartData.trades) {
+          str += '<p><b>Итого:</b></p>';
+          for (let trade of chartData.trades) {
+            str += '<p>' + trade.ISIN + ': Дата покупки ' + trade.date + '; Цена ' + trade.price + '; Дата продажи ' + trade.soldDate
+                + '; Цена ' + trade.soldPrice + '; Разница ' + (trade.soldPrice - trade.price) + '</p>';
+          }
+          str += '<p>Затраты: ' + chartData.buySum + '; Прибыль ' + chartData.profit + '; % ' + chartData.profitRel + '</p>';
+        }
         $('#data').html(str); 
     }
 

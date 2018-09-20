@@ -16,26 +16,27 @@ module.exports.common = function (req, res, next) {
     next();
 }
 
-module.exports.sma1550 = async function (req, res, next) {
+module.exports.strategy = async function (req, res, next) {
     try {
-        let view = 'sma-15-50'
+        let strategyName = req._parsedUrl.pathname.split('/').pop()
+            , view = 'strategy'
             , viewData = {}
             ;
 
         res.viewData.layout = 'layout';
 
         let Strategy = require('../classes/strategy')
-            , sma1550 = require('../strategies/sma-15-50')
+            , strategyClass = require('../strategies/' + strategyName)
             ;
 
-        let strategy = new Strategy('sma-15-50', sma1550.init, sma1550.tick);
+        let strategy = new Strategy(strategyName, strategyClass.init, strategyClass.tick);
         await strategy.init();
 
         let tickData = await strategy._tick();
         let graphics = {
             data: JSON.stringify(tickData)
         };
-        graphics.isins = Object.keys(tickData);
+        graphics.isins = Object.keys(tickData.items);
         viewData.graphics = graphics;
 
         res.viewData.content = views.render(view, viewData);

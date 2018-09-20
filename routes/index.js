@@ -8,7 +8,7 @@ router.all('*', mainCtrl.common);
 
 router.get('/', mainCtrl.tests);
 
-router.get('/sma1550', mainCtrl.sma1550);
+router.get('/strategy/*', mainCtrl.strategy);
 
 router.all('*', mainCtrl.commonEnd);
 
